@@ -39,5 +39,5 @@ This document compiles and details the core academic references suggested for th
 ## 3. Course Deliverables Context
 
 ### Course Syllabus Guide
-* **Reference:** Generative Modeling Course Staff. (2026). *Course Project Guide: Generative Modeling: Diffusion, Flow Matching, and Stochastic Interpolants*. Master's Course in Generative Machine Learning.
+* **Reference:** Instructor: Ivan Dokmanić, Term: Spring 2026. (2026). *Course Project Guide: Generative Modeling: Diffusion, Flow Matching, and Stochastic Interpolants*. Master's Course in Generative Machine Learning.
 * **Relevance:** Documents the specific bundle boundaries (Bundle A2) and evaluation metrics requirements.
