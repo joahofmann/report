@@ -38,6 +38,7 @@
                 <a href="#dataset-comparison" class="nav-item" id="link-dataset-comparison">Experiments & Metrics</a>
                 <a href="#hardware" class="nav-item" id="link-hardware">Hardware & AMP</a>
                 <a href="#conclusions" class="nav-item" id="link-conclusions">Conclusions</a>
+                <a href="#references" class="nav-item" id="link-references">References</a>
             </nav>
 
             <div class="sidebar-footer">
@@ -296,6 +297,50 @@ latency_ms = (time.time() - start_time) * 1000</code></pre>
                         </div>
                         <p>RF successfully straightens trajectories (straightness score of **$0.9993$** on CelebA and **$1.004$** on Moons). This enables **1-step analytical generation** (latency of only <strong>0.98 ms</strong> per image), providing a **55x speedup** with minimal loss in visual quality (FID of 8.98 vs 3.66 for 50-step FM).</p>
                     </div>
+                </div>
+            </section>
+
+            <!-- Section: References -->
+            <section id="references" class="content-section card">
+                <h2>References</h2>
+                <div class="references-container">
+                    <ol class="ref-list">
+                        <li class="ref-item">
+                            <strong>Instructor: Ivan Dokmanić, Term: Spring 2026.</strong> 
+                            <em>Course Project Guide: Generative Modeling: Diffusion, Flow Matching, and Stochastic Interpolants</em>. 
+                            Master's Course in Generative Machine Learning, May 2026.
+                        </li>
+                        <li class="ref-item">
+                            <strong>Jonathan Ho, Ajay Jain, &amp; Pieter Abbeel (2020).</strong> 
+                            Denoising Diffusion Probabilistic Models. 
+                            <em>Advances in Neural Information Processing Systems (NeurIPS 2020)</em>, 33, 6840-6851.
+                        </li>
+                        <li class="ref-item">
+                            <strong>Yaron Lipman, Ricky T. Q. Chen, Heli Ben-Hamu, Maximilian Nicklas, &amp; Mattese Le (2022).</strong> 
+                            Flow Matching for Generative Modeling. 
+                            <em>arXiv preprint arXiv:2210.02747</em>.
+                        </li>
+                        <li class="ref-item">
+                            <strong>Qiang Liu, Lemeng Ji, &amp; Jiaming Deng (2022).</strong> 
+                            Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow. 
+                            <em>arXiv preprint arXiv:2209.03003</em>.
+                        </li>
+                        <li class="ref-item">
+                            <strong>Michael S. Albergo, Nicholas M. Boffi, &amp; Eric Vanden-Eijnden (2023).</strong> 
+                            Stochastic Interpolants: A Unifying Framework for Flows and Diffusions. 
+                            <em>arXiv preprint arXiv:2303.08797</em>.
+                        </li>
+                        <li class="ref-item">
+                            <strong>Olaf Ronneberger, Philipp Fischer, &amp; Thomas Brox (2015).</strong> 
+                            U-Net: Convolutional Networks for Biomedical Image Segmentation. 
+                            <em>Medical Image Computing and Computer-Assisted Intervention (MICCAI 2015)</em>.
+                        </li>
+                        <li class="ref-item">
+                            <strong>Diederik P. Kingma &amp; Jimmy Ba (2014).</strong> 
+                            Adam: A Method for Stochastic Optimization. 
+                            <em>International Conference on Learning Representations (ICLR 2015)</em>.
+                        </li>
+                    </ol>
                 </div>
             </section>
 

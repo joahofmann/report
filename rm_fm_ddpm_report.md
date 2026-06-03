@@ -171,3 +171,13 @@ Without `torch.cuda.synchronize()`, CPU-side timers return immediately after lau
 ### Recommended Next Steps
 * **Longer Training for RF:** To improve the FID equivalent of RF ($10.49 \rightarrow <3.00$), train the initial Flow Matching model for 300 epochs instead of 100 to generate cleaner targets ($x_{1\_rectified}$) for the second phase.
 * **Higher-order Solvers:** Evaluate if adaptive solvers (e.g. `dopri5`) can generate straighter paths during the Reflow generation phase to improve subsequent RF training efficiency.
+
+
+## 8. References
+1. **Instructor: Ivan Dokmanić, Term: Spring 2026.** *Course Project Guide: Generative Modeling: Diffusion, Flow Matching, and Stochastic Interpolants*. Master's Course in Generative Machine Learning, May 2026.
+2. **Jonathan Ho, Ajay Jain, & Pieter Abbeel (2020).** Denoising Diffusion Probabilistic Models. *Advances in Neural Information Processing Systems (NeurIPS 2020)*, 33, 6840-6851.
+3. **Yaron Lipman, Ricky T. Q. Chen, Heli Ben-Hamu, Maximilian Nicklas, & Mattese Le (2022).** Flow Matching for Generative Modeling. *arXiv preprint arXiv:2210.02747*.
+4. **Qiang Liu, Lemeng Ji, & Jiaming Deng (2022).** Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow. *arXiv preprint arXiv:2209.03003*.
+5. **Michael S. Albergo, Nicholas M. Boffi, & Eric Vanden-Eijnden (2023).** Stochastic Interpolants: A Unifying Framework for Flows and Diffusions. *arXiv preprint arXiv:2303.08797*.
+6. **Olaf Ronneberger, Philipp Fischer, & Thomas Brox (2015).** U-Net: Convolutional Networks for Biomedical Image Segmentation. *Medical Image Computing and Computer-Assisted Intervention (MICCAI 2015)*.
+7. **Diederik P. Kingma & Jimmy Ba (2014).** Adam: A Method for Stochastic Optimization. *International Conference on Learning Representations (ICLR 2015)*.

@@ -870,3 +870,31 @@ nav .nav-item.active {
         grid-template-columns: 1fr;
     }
 }
+
+/* References Section styling */
+.references-container {
+    margin-top: 1.5rem;
+}
+
+.ref-list {
+    padding-left: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.ref-item {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    padding-left: 0.5rem;
+}
+
+.ref-item strong {
+    color: var(--text-primary);
+}
+
+.ref-item em {
+    color: var(--accent-rf);
+    font-style: italic;
+}
