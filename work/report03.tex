@@ -6,6 +6,7 @@
 \usepackage{hyperref}
 \usepackage{titlesec}
 \usepackage{microtype}
+\usepackage{graphicx}
 
 % Title Configuration
 \title{\textbf{Comparative Analysis of Generative Frameworks:\\ Focus on DDPM vs. Flow Matching vs. Rectified Flow}}
@@ -271,5 +272,58 @@ This appendix compiles the hardware, software, and training hyperparameters util
     \item \textbf{DDPM Step Count:} $50$ steps.
     \item \textbf{DDPM Noise Schedule:} Linear schedule bounded from $\beta_{\text{start}} = 10^{-4}$ to $\beta_{\text{end}} = 0.02$.
 \end{itemize}
+
+\section{Comparing outputs of the to moon evaluation}
+This section presents the visual results of the continuous 2D coordinate point cloud evaluation.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{../../compDDPM-FM/outputs/model_comparison.png}
+\caption{Visual sample and trajectory comparisons for the Dual Moon dataset.}
+\label{fig:moons_comparison}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{../../compDDPM-FM/outputs/loss_comparison.png}
+\caption{Training loss convergence curves across all model phases on the Dual Moon dataset.}
+\label{fig:moons_loss}
+\end{figure}
+
+\section{Comparing outputs of the to Celeb054 evaluation}
+This section displays the training loss curves and comparative facial grid samples generated during the CelebA face synthesis evaluation.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{../../antiCeleb064/Alex_RM/Output_Images_FM/loss_comparison.png}
+\caption{Training loss convergence comparison curves for CelebA-64 models.}
+\label{fig:celeba_loss}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\begin{minipage}{0.32\textwidth}
+\centering
+\includegraphics[width=\textwidth]{../../antiCeleb064/Alex_RM/Output_Images_FM/ddpm_output_grid.png}
+\caption{DDPM (50 steps)}
+\label{fig:celeba_ddpm}
+\end{minipage}
+\hfill
+\begin{minipage}{0.32\textwidth}
+\centering
+\includegraphics[width=\textwidth]{../../antiCeleb064/Alex_RM/Output_Images_FM/flow_matching_output_grid.png}
+\caption{Flow Matching (50 steps)}
+\label{fig:celeba_fm}
+\end{minipage}
+\hfill
+\begin{minipage}{0.32\textwidth}
+\centering
+\includegraphics[width=\textwidth]{../../antiCeleb064/Alex_RM/Output_Images_FM/rectified_flow_1step_output.png}
+\caption{Rectified Flow (1 step)}
+\label{fig:celeba_rf_1step}
+\end{minipage}
+\caption{Comparison of synthesized facial grids on CelebA-64 across different generative paths.}
+\label{fig:celeba_grids}
+\end{figure}
 
 \end{document}
