@@ -7,6 +7,7 @@
 \usepackage{titlesec}
 \usepackage{microtype}
 \usepackage[draft=false]{graphicx}
+\usepackage{float}
 
 % Title Configuration
 \title{\textbf{Comparative Analysis of Generative Frameworks:\\ Focus on DDPM vs. Flow Matching vs. Rectified Flow}}
@@ -251,14 +252,14 @@ This appendix compiles the hardware, software, and training hyperparameters util
 \section{Comparing outputs of the to moon evaluation}
 This section presents the visual results of the continuous 2D coordinate point cloud evaluation.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.75\textwidth]{assets/moons_comparison.png}
 \caption{Visual sample and trajectory comparisons for the Dual Moon dataset. The subplots display: (1) Target Moons Data (True Data Distribution); (2) DDPM Samples (Stochastic Reverse Sampling); (3) Flow Matching in 50 Steps (ODE Euler Integration); (4) Flow Matching in 1 Step (Overshoots Curved Paths); (5) Rectified Flow in 1 Step (Follows Straight Paths Perfectly); and (6) Trajectories Comparison showing curved Flow Matching paths (green, dashed) against straightened Rectified Flow paths (red, solid).}
 \label{fig:moons_comparison}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.75\textwidth]{assets/moons_loss.png}
 \caption{Training loss convergence curves across all model phases on the Dual Moon dataset.}
@@ -268,14 +269,14 @@ This section presents the visual results of the continuous 2D coordinate point c
 \section{Comparing outputs of the to Celeb054 evaluation}
 This section displays the training loss curves and comparative facial grid samples generated during the CelebA face synthesis evaluation.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.75\textwidth]{assets/celeba_loss.png}
 \caption{Training loss convergence comparison curves for CelebA-64 models.}
 \label{fig:celeba_loss}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \begin{minipage}{0.32\textwidth}
 \centering
