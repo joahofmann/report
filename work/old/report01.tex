@@ -1,0 +1,148 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{microtype}
+
+% Title Configuration
+\title{\textbf{Comparative Analysis of Generative Frameworks:\\ Focus on DDPM vs. Flow Matching vs. Rectified Flow}}
+\author{\textbf{Presenters:} Joachim Hofmann \& Alex Hanselmann \\
+\small \textbf{Context:} Master's Course in Generative Machine Learning}
+\date{\textbf{Date:} May 28, 2026}
+
+\begin{document}
+
+\maketitle
+
+\hrule
+\vspace{0.4cm}
+
+\section{Introduction and Research Objectives}
+This report documents the findings of our research within Bundle A2 of the Generative Machine Learning curriculum. We address the recent paradigm shift in generative modeling: the move from stochastic diffusion processes to deterministic flow-based methods. While Denoising Diffusion Probabilistic Models (DDPM) established the baseline for high-fidelity synthesis, their reliance on stochastic reverse chains introduces significant computational bottlenecks.
+
+Our primary mission is a comparative evaluation of DDPM, Flow Matching (FM), and Rectified Flow (RF) using the CelebA-64 dataset. We aim to rigorously analyze how these frameworks handle the transport from a Gaussian source to a data distribution, focusing on two research goals:
+\begin{itemize}
+    \item \textbf{Minimization of Operational Cost:} We define this through ``NFE'' (Number of Function Evaluations)---the count of neural network passes required for a single sample---and ``Wall-Clock Cost'' (Latency), the physical execution time in milliseconds (ms).
+    \item \textbf{Mathematical Formulation Stability:} This refers to the geometric precision of the generative trajectories. We quantify stability using the Mean Squared Error (MSE), which measures the ``Path Deviation'' of the model's predicted trajectory from a theoretical straight line.
+\end{itemize}
+By analyzing these metrics, we seek to demonstrate how path ``straightening'' directly impacts hardware efficiency and model stability.
+
+\section{Theoretical Framework: Stochastic vs. Deterministic Transport}
+The architectural divergence between these frameworks is rooted in the choice between Stochastic Differential Equations (SDE) and Ordinary Differential Equations (ODE). DDPM models the generative process as a reverse-time SDE, incorporating ``stochastic jitter'' to remain stable. Conversely, Flow Matching and Rectified Flow utilize an ODE framework to define a smooth, deterministic velocity field.
+
+\begin{table}[h]
+\centering
+\caption{Systematic Comparison of Generative Paradigms}
+\label{tab:paradigms}
+\vspace{0.2cm}
+\small
+\begin{tabular}{lll}
+\toprule
+\textbf{Dimension} & \textbf{Diffusion Models (DDPM)} & \textbf{Rectified Flow (RF)} \\
+\midrule
+Systemic Basis & SDE: $dx_t = f(t)x_t dt + g(t)dw_t$ & ODE: $dx_t = v(x_t, t)dt$ \\
+\addlinespace
+Path Interpolation & Non-linear: $X_t = \sqrt{\bar{\alpha}_t} X_1 + \sqrt{1 - \bar{\alpha}_t} \epsilon$ & Linear: $X_t = (1 - t)X_0 + tX_1$ \\
+\addlinespace
+Learning Target & Added Noise ($\epsilon$) & Velocity Field ($v$) \\
+\addlinespace
+Loss Function & $\mathcal{L} = \mathbb{E} \left[ \| \epsilon - \hat{\epsilon}_\theta \|^2 \right]$ & $\mathcal{L} = \mathbb{E} \left[ \| (X_1 - X_0) - v_\theta \|^2 \right]$ \\
+\addlinespace
+Inference Logic & Stochastic Markov Chain & Deterministic Euler Step \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Path Entanglement and the Mean Value Problem}
+A fundamental challenge in high-dimensional transport is ``Path Entanglement.'' Even with a linear interpolation between $X_0$ and $X_1$, different pairs of noise and data often result in crossing trajectories. Since a neural network $v_\theta(x, t)$ is a single-valued function, it is mathematically forced to learn the average (mean) of all target directions at any intersection point. This forcing leads to a time-variant, curved velocity field, which manifests empirically as ``Blur'' in generated samples and high inference costs due to the need for many small integration steps.
+
+\subsection{The Mathematical Link: Eulerian vs. Lagrangian}
+Flow Matching and Rectified Flow describe the same physical transport but through different lenses. Flow Matching typically adopts an Eulerian (Field-centric) perspective, focusing on the continuity equation:
+\begin{equation}
+\frac{\partial \rho_t(x)}{\partial t} + \nabla \cdot (\rho_t(x)v(x, t)) = 0
+\end{equation}
+to preserve probability mass. Rectified Flow adopts a Lagrangian (Particle-centric) perspective, focusing on the trajectories of individual random variable paths $X_t$. The goal of Rectified Flow is to solve the entanglement problem by explicitly straightening these paths.
+
+\section{The Rectified Flow Framework: From Chaos to Straight Highways}
+Rectified Flow provides a structured, three-phase approach to eliminate path curvature, enabling extreme inference efficiency.
+
+\begin{enumerate}
+    \item \textbf{Phase 1: Initial Training/Rectification (1-RF):} The model learns a velocity field $v_\theta$ to minimize the least-squares error along linear paths. While this establishes a valid flow, the paths still cross and curve because $X_0$ and $X_1$ are coupled independently.
+    \item \textbf{Phase 2: The Reflow Step (2-RF):} This is the critical ``Flow-Rewiring'' phase. By simulating the ODE from Phase 1, we find the deterministic endpoints $X^{\text{rect}}_1$ for each $X_0$. This process re-pairs the noise and data to minimize the quadratic transport cost:
+    \begin{equation}
+    \min_\pi \int \|x_0 - x_1\|^2 d\pi(x_0, x_1)
+    \end{equation}
+    The result is a set of non-intersecting, perfectly straight trajectories.
+    \item \textbf{Phase 3: Jump:} Once the paths are straightened and the velocity field becomes time-independent ($v(x, t) \approx v(x, 0)$), a student model $\alpha_\phi(X_0)$ is trained to predict the exact ODE endpoint $X_1$ in a single step, effectively skipping the simulation path entirely.
+\end{enumerate}
+
+\noindent\textbf{Analysis:} The ``Reflow'' step is what allows the generative process to collapse from many steps to one. By minimizing the quadratic transport cost, the model regularizes the velocity field toward homogeneity. This removes the necessity of an iterative solver to compensate for direction changes during inference.
+
+\section{Implementation Architecture and Evaluation Metrics}
+To ensure a rigorous ``fair-comparison'' environment, we utilized a routing node architecture where all models originate from a shared initial noise distribution $\mathcal{N}(0, \mathbf{I})$.
+
+\subsection{Evaluation Architecture}
+\begin{itemize}
+    \item \textbf{Routing Node:} Distributes the shared latent noise to three execution paths: the Stochastic Reverse Chain (DDPM), the Deterministic ODE Solver (FM), and the 1-Step Jump Network (RF).
+    \item \textbf{Backbone Integration:} We employ a convolutional U-Net conditioned on the time variable $t$. The scalar $t$ is first transformed via sinusoidal position encoding.
+    \item \textbf{MLP Specifics:} The embedding is processed by a Multi-Layer Perceptron using a specific \texttt{nn.Sequential(nn.Linear(...), nn.ReLU())} architecture. The output is projected and added to the U-Net feature maps, allowing the network to dynamically adjust to the current timestep.
+\end{itemize}
+
+\subsection{Measurement Layer}
+We evaluate the performance across three specific metrics:
+\begin{itemize}
+    \item \textbf{NFE $\downarrow$:} The total number of network executions per image.
+    \item \textbf{Latency (ms) $\downarrow$:} Physical wall-clock time on hardware.
+    \item \textbf{MSE (Path Deviation) $\downarrow$:} The mean squared error measuring drift from a linear trajectory.
+\end{itemize}
+
+\section{Empirical Results and Performance Analysis}
+Our measurements on the CelebA-64 dataset confirm that path straightening leads to a dramatic reduction in operational costs without sacrificing stability.
+
+\begin{table}[h]
+\centering
+\caption{Live-Measurement Performance Matrix}
+\label{tab:results}
+\vspace{0.2cm}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Framework} & \textbf{NFE $\downarrow$} & \textbf{Latency (ms) $\downarrow$} & \textbf{Abweichung (MSE) $\downarrow$} \\
+\midrule
+DDPM (Diffusion) & 10 & 12.18 & 1.8597 \\
+Flow Matching    & 10 & 14.29 & 2.2676 \\
+Rectified Flow   & 1  & 1.46  & 2.1518 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Critical Evaluation}
+The data reveals a $9.78\times$ acceleration for Rectified Flow compared to Flow Matching ($1.46$\,ms vs. $14.29$\,ms). While DDPM and FM require iterative steps ($\text{NFE}=10$) to maintain sample structure, RF achieves high-quality generation in a single step ($\text{NFE}=1$).
+
+The stability results are even more compelling. Rectified Flow at 1 step achieves a lower MSE ($2.1518$) than Flow Matching does at 10 steps ($2.2676$). This provides mathematical proof that the unconstrained Least-Squares objective used in the RF ``Reflow'' step acts as a superior regularizer for path straightness. By straightening trajectories during training, we minimize the integration drift that plagues iterative solvers. This stability effectively prevents ``Mode Collapse'' by preserving the topology of the distribution and eliminates ``Blur'' by removing the need for the model to learn mean values at path intersections.
+
+\section{Conclusion and Strategic Takeaways}
+The evolution from the stochastic ``zick-zack'' of diffusion to the linear highways of Rectified Flow marks the current state-of-the-art for real-time generative AI. By replacing complex stochastic schedules with a deterministic, linear transport mechanism, we have successfully collapsed inference time while maintaining---and in some cases improving---mathematical stability.
+
+\vspace{0.4cm}
+\noindent\hrulefill
+\vspace{0.2cm}
+
+\subsubsection*{Expert Remark}
+\begin{itemize}
+    \item \textbf{DDPM} is akin to ``navigating in fog.'' It moves through many small, random steps, injecting noise at every stage to remain stable:
+    \begin{equation}
+    X_{t-1} = \frac{1}{\sqrt{\alpha_t}} \left( X_t - \frac{1-\alpha_t}{\sqrt{1-\bar{\alpha}_t}} \hat{\epsilon} \right) + \sigma_t z
+    \end{equation}
+    which results in high computational overhead.
+    \item \textbf{Rectified Flow} is the process of ``building a straight highway.'' It calculates the final destination:
+    \begin{equation}
+    X_1 = X_0 + v_\theta(X_0, 0) \cdot 1.0
+    \end{equation}
+    removes all curves via the Reflow step, and drives there directly in a single jump without relying on stochasticity.
+\end{itemize}
+For industrial applications where millisecond latency is non-negotiable, Rectified Flow represents the most robust and efficient framework currently available.
+
+\end{document}
