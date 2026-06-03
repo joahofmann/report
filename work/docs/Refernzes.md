@@ -24,27 +24,11 @@ This document compiles and details the core academic references suggested for th
 
 ---
 
-## 2. Fast Sampling & Specialized Solvers
-
-### Denoising Diffusion Implicit Models (DDIM)
-* **Reference:** Song, J., Meng, C., & Ermon, S. (2020). *Denoising Diffusion Implicit Models*. arXiv preprint arXiv:2010.02502.
-* **Relevance:** Early baseline for transitioning from Markov chains to deterministic ODE sampling in diffusion.
-
-### DPM-Solver (Higher-Order ODE Integrators)
-* **Reference:** Lu, C., Zhou, Y., Li, C., & Zhu, J. (2022). *DPM-Solver: A Fast ODE Solver for Diffusion Probabilistic Model Sampling*. Advances in Neural Information Processing Systems (NeurIPS 2022).
-* **Relevance:** Standard reference for using specialized numerical solvers to reduce steps in flow and diffusion models.
-
----
-
-## 3. Neural Architecture & Optimizer Stack
+## 2. Neural Architecture & Optimizer Stack
 
 ### Convolutional U-Net Backbone
 * **Reference:** Ronneberger, O., Fischer, P., & Brox, T. (2015). *U-Net: Convolutional Networks for Biomedical Image Segmentation*. Medical Image Computing and Computer-Assisted Intervention (MICCAI 2015).
 * **Relevance:** The core spatial feature backbone used to predict noise and velocity fields in image synthesis.
-
-### Sinusoidal Timestep Embeddings
-* **Reference:** Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, L., & Polosukhin, I. (2017). *Attention Is All You Need*. Advances in Neural Information Processing Systems (NeurIPS 2017), 30, 5998-6008.
-* **Relevance:** Defines the sinusoidal position embedding formulas used to encode the continuous time step $t$ into the U-Net layers.
 
 ### Adam Optimizer
 * **Reference:** Kingma, D. P., & Ba, J. (2014). *Adam: A Method for Stochastic Optimization*. International Conference on Learning Representations (ICLR 2015).
@@ -52,7 +36,7 @@ This document compiles and details the core academic references suggested for th
 
 ---
 
-## 4. Course Deliverables Context
+## 3. Course Deliverables Context
 
 ### Course Syllabus Guide
 * **Reference:** Generative Modeling Course Staff. (2026). *Course Project Guide: Generative Modeling: Diffusion, Flow Matching, and Stochastic Interpolants*. Master's Course in Generative Machine Learning.
