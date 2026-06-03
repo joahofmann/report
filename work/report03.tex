@@ -99,4 +99,58 @@ We evaluate the performance across three specific metrics[cite: 123]:
     \item \textbf{MSE (Path Deviation) $\downarrow$:} The mean squared error measuring drift from a linear trajectory[cite: 124].
 \end{itemize}
 
+\section{Evaluation}
+In this section, we present the empirical results of our comparative evaluation across the two target datasets: the 2D Dual Moon point cloud and the CelebA 64x64 face dataset (referred to here as Cleleb064). All benchmarks were executed on an NVIDIA RTX A5000 Laptop GPU.
+
+\subsection{Dual moon evaluation}
+The Dual Moon dataset serves as a 2D continuous coordinate benchmark. This setup allows us to visualize particle trajectories and calculate exact path straightness. The quantitative performance metrics of the four models on the Dual Moon dataset are summarized in Table~\ref{tab:moons_results}.
+
+\begin{table}[h]
+\centering
+\caption{Dual Moon Performance Comparison}
+\label{tab:moons_results}
+\vspace{0.2cm}
+\small
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Method} & \textbf{NFE} & \textbf{Latency (ms)} & \textbf{Chamfer Distance} & \textbf{Fr\'echet Distance} & \textbf{Straightness} \\
+\midrule
+DDPM (stochastic) & 100 & 49.98 & 0.1125 & 0.0095 & N/A \\
+Flow Matching (50 steps) & 50 & 10.52 & 0.1216 & 0.0069 & 2.3636 \\
+Flow Matching (1 step) & 1 & 0.00 & 0.8142 & 1.1300 & N/A \\
+Rectified Flow (1 step) & 1 & 0.00 & 0.1362 & 0.0082 & 1.0041 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+As shown in Table~\ref{tab:moons_results}, the trajectories learned by Flow Matching are highly curved, resulting in a straightness score of $2.3636$. Consequently, attempting to sample from Flow Matching in a single step causes severe overshooting and distribution collapse (Fr\'echet Distance of $1.1300$). Through the path-straightening Reflow step, Rectified Flow achieves a straightness score of $1.0041$ (near-perfect straightness). This allows 1-step analytical sampling to generate high-fidelity samples (Fr\'echet Distance of $0.0082$ and Chamfer Distance of $0.1362$) with virtually zero latency under GPU acceleration.
+
+\subsection{Cleleb064 evaluation}
+For the image generation task, the models were trained for 100 epochs on 10,000 CelebA face images of resolution 64x64 pixels. The backbone model utilized a conditional U-Net with sinusoidal time embedding. The benchmarking results are compiled in Table~\ref{tab:celeba_results}.
+
+\begin{table}[h]
+\centering
+\caption{Cleleb064 Image Synthesis Benchmarking}
+\label{tab:celeba_results}
+\vspace{0.2cm}
+\small
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Method} & \textbf{NFE} & \textbf{Latency (ms/img)} & \textbf{Chamfer Distance} & \textbf{FID Equivalent} & \textbf{Straightness} \\
+\midrule
+DDPM (50 steps) & 50 & 54.11 & 0.7711 & 10.1798 & N/A \\
+Flow Matching (50 steps) & 50 & 53.83 & 1.0857 & 3.6626 & 0.9856 \\
+Rectified Flow (50 steps) & 50 & 53.56 & 1.1874 & 10.4974 & 0.9993 \\
+Rectified Flow (1 step) & 1 & 0.98 & 1.0489 & 8.9868 & 1.0000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The empirical results in Table~\ref{tab:celeba_results} yield several key observations:
+\begin{itemize}
+    \item \textbf{Inference Speedup:} While all 50-step generation runs require approximately $53$--$54$ ms per image, the 1-step Rectified Flow executes in only $0.98$ ms per image. This represents a $55\times$ computational acceleration, enabling sub-millisecond generation.
+    \item \textbf{Trajectory Straightening:} The Flow Matching model exhibits a curved path score of $0.9856$, whereas the Reflow procedure straightens the trajectories to a score of $0.9993$ (50 steps) and exactly $1.0000$ (1 step).
+    \item \textbf{Quality Trade-offs:} Flow Matching achieves the lowest FID Equivalent of $3.6626$ at 100 epochs, demonstrating superior distribution alignment. However, 1-step Rectified Flow achieves an FID Equivalent of $8.9868$, which outperforms 50-step DDPM ($10.1798$) and 50-step Rectified Flow ($10.4974$). This suggests that by straightening the paths, Rectified Flow reduces path-intersection noise, leading to more efficient representation learning under limited epoch training regimes.
+\end{itemize}
+
 \end{document}
