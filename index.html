@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparative Evaluation: DDPM, Flow Matching & Rectified Flow</title>
+    
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- KaTeX CSS & Script -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    
+    <!-- Styling -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+
+    <!-- Top Glow Effect -->
+    <div class="top-glow"></div>
+
+    <div class="app-container">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span class="logo-text">EvalDashboard</span>
+                <span class="logo-dot">.</span>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#overview" class="nav-item active" id="link-overview">Overview</a>
+                <a href="#math" class="nav-item" id="link-math">Mathematical Theory</a>
+                <a href="#dataset-comparison" class="nav-item" id="link-dataset-comparison">Experiments & Metrics</a>
+                <a href="#hardware" class="nav-item" id="link-hardware">Hardware & AMP</a>
+                <a href="#conclusions" class="nav-item" id="link-conclusions">Conclusions</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="theme-toggle-btn" id="theme-toggle">
+                    <span class="toggle-icon">☀️</span>
+                    <span class="toggle-text">Toggle Theme</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- Section: Overview -->
+            <section id="overview" class="content-section">
+                <div class="badge">Evaluation Report</div>
+                <h1 class="main-title">DDPM, Flow Matching &amp; Rectified Flow</h1>
+                <p class="subtitle">A comparative benchmarking of stochastic diffusion vs. deterministic ODE-based generative models.</p>
+                
+                <div class="overview-cards">
+                    <div class="stat-card">
+                        <span class="card-icon">⚡</span>
+                        <div class="stat-info">
+                            <span class="stat-num" id="hero-speedup">55x</span>
+                            <span class="stat-label">Inference Speedup</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="card-icon">📏</span>
+                        <div class="stat-info">
+                            <span class="stat-num" id="hero-straightness">1.0000</span>
+                            <span class="stat-label">RM Straightness Score</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="card-icon">🚀</span>
+                        <div class="stat-info">
+                            <span class="stat-num" id="hero-nfe">1</span>
+                            <span class="stat-label">NFE for RM Sampling</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card intro-card">
+                    <h2>Executive Summary</h2>
+                    <p>
+                        Generative modeling is undergoing a paradigm shift from traditional stochastic diffusion paths (e.g. DDPM) towards deterministic, velocity-field-based Ordinary Differential Equations (ODEs) like Flow Matching and Rectified Flow. This dashboard offers interactive visualization and quantitative evaluation metrics of these three paradigms trained on the <strong>2D Two Moons Point Cloud</strong> and the <strong>64x64 CelebA Faces Dataset</strong>, compiled on a physical <strong>NVIDIA RTX A5000 Laptop GPU</strong>.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Section: Mathematical Theory -->
+            <section id="math" class="content-section card">
+                <h2>Mathematical Frameworks</h2>
+                <p class="section-desc">Each algorithm constructs a path mapping simple noise to the structured target data distribution, but they optimize different fields and trajectories.</p>
+                
+                <div class="math-grid">
+                    <div class="math-card purple-border">
+                        <h3>Denoising Diffusion Probabilistic Models (DDPM)</h3>
+                        <p class="math-concept">Generative sampling is modeled as the reverse of a stochastic noising process over discrete steps.</p>
+                        
+                        <div class="formula-block">
+                            <span class="formula-title">Forward Process</span>
+                            $$q(x_t|x_0) = \mathcal{N}(x_t; \sqrt{\bar{\alpha}_t}x_0, (1 - \bar{\alpha}_t)\mathbf{I})$$
+                        </div>
+                        
+                        <div class="formula-block">
+                            <span class="formula-title">Training Objective (MSE)</span>
+                            $$\mathcal{L}_{\text{DDPM}}(\theta) = \mathbb{E}_{t, x_0, \epsilon} \left[ \|\epsilon - \epsilon_\theta(x_t, t)\|^2 \right]$$
+                        </div>
+
+                        <div class="formula-block">
+                            <span class="formula-title">Stochastic Denoising Step</span>
+                            $$x_{t-1} = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{\beta_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_\theta(x_t, t) \right) + \sigma_t z$$
+                        </div>
+                    </div>
+
+                    <div class="math-card green-border">
+                        <h3>Flow Matching (FM)</h3>
+                        <p class="math-concept">Generative sampling is modeled as integrating a deterministic velocity field representing the average path.</p>
+                        
+                        <div class="formula-block">
+                            <span class="formula-title">Linear Interpolation Path</span>
+                            $$x_t = x_0 + t(x_1 - x_0)$$
+                        </div>
+                        
+                        <div class="formula-block">
+                            <span class="formula-title">Training Objective (Velocity Match)</span>
+                            $$\mathcal{L}_{\text{FM}}(\theta) = \mathbb{E}_{t, x_0, x_1} \left[ \|v_\theta(x_t, t) - (x_1 - x_0)\|^2 \right]$$
+                        </div>
+
+                        <div class="formula-block">
+                            <span class="formula-title">ODE Integration Step</span>
+                            $$x_{t+dt} = x_t + v_\theta(x_t, t)dt$$
+                        </div>
+                    </div>
+
+                    <div class="math-card orange-border">
+                        <h3>Rectified Flow (RM / 2-RF)</h3>
+                        <p class="math-concept">Trajectories are straightened by retraining the velocity network on deterministic pairs generated by Flow Matching.</p>
+                        
+                        <div class="formula-block">
+                            <span class="formula-title">Reflow Pair Generation</span>
+                            $$x_{1,\text{rect}} = \text{Solve-ODE}(x_0, v_\theta^{\text{FM}})$$
+                        </div>
+                        
+                        <div class="formula-block">
+                            <span class="formula-title">Straightened Path Training</span>
+                            $$\mathcal{L}_{\text{RF}}(\theta) = \mathbb{E}_{t, x_0, x_{1,\text{rect}}} \left[ \|v_\theta^{\text{RF}}(x_t, t) - (x_{1,\text{rect}} - x_0)\|^2 \right]$$
+                        </div>
+
+                        <div class="formula-block">
+                            <span class="formula-title">1-Step Analytical Inference</span>
+                            $$x_1 = x_0 + v_\theta^{\text{RF}}(x_0, 0)$$
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Dataset Comparison -->
+            <section id="dataset-comparison" class="content-section">
+                <div class="tabs-header">
+                    <h2>Experimental Benchmarking</h2>
+                    <div class="tabs">
+                        <button class="tab-btn active" id="tab-moons" onclick="switchDataset('moons')">2D Two Moons</button>
+                        <button class="tab-btn" id="tab-celeba" onclick="switchDataset('celeba')">CelebA 64x64 Faces</button>
+                    </div>
+                </div>
+
+                <!-- Interactive Card containing active dataset parameters and metrics -->
+                <div class="card dataset-card">
+                    <div class="card-header">
+                        <h3 id="dataset-title">Dataset: 2D Two Moons</h3>
+                        <p id="dataset-summary" class="summary-text">A toy continuous dataset used to analyze path straightness and model stability in 2D coordinate space.</p>
+                    </div>
+                    
+                    <div class="dataset-grid">
+                        
+                        <!-- Col 1: Parameters & Metrics -->
+                        <div class="dataset-info-pane">
+                            <h4>Run Configuration</h4>
+                            <div class="params-list" id="params-container">
+                                <!-- Dynamic Parameters loaded via JS -->
+                            </div>
+
+                            <h4 style="margin-top: 2rem;">Evaluation Metrics</h4>
+                            <div class="table-container">
+                                <table class="metrics-table" id="metrics-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Method</th>
+                                            <th>NFE</th>
+                                            <th>Time (ms)</th>
+                                            <th>Chamfer</th>
+                                            <th>FID Equiv</th>
+                                            <th>Straightness</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="metrics-tbody">
+                                        <!-- Dynamic Metrics loaded via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Col 2: Loss & Qualitative Visuals -->
+                        <div class="dataset-visuals-pane">
+                            <h4>Training Loss Convergence</h4>
+                            <div class="image-wrapper">
+                                <img src="assets/moons_loss.png" alt="Training Loss Curve" id="loss-img" class="dashboard-img">
+                            </div>
+                            
+                            <h4 style="margin-top: 2rem;">Qualitative Samples &amp; Paths</h4>
+                            <div class="image-wrapper" id="sample-img-container">
+                                <img src="assets/moons_comparison.png" alt="Model Comparison Samples" id="sample-img" class="dashboard-img">
+                            </div>
+                            
+                            <!-- Carousel panel only visible for CelebA -->
+                            <div class="celeba-selector-panel hidden" id="celeba-selector">
+                                <span class="selector-label">Inspect Generated Faces:</span>
+                                <div class="selector-buttons">
+                                    <button class="selector-btn active" onclick="switchCelebAGrid('ddpm')">DDPM (50 steps)</button>
+                                    <button class="selector-btn" onclick="switchCelebAGrid('fm')">Flow Matching (50 steps)</button>
+                                    <button class="selector-btn" onclick="switchCelebAGrid('rf')">Rectified Flow (1 step)</button>
+                                </div>
+                                <p class="grid-desc" id="celeba-grid-desc">DDPM sampling exhibits high visual sharpness but requires stochastic reverse steps.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Hardware Optimization -->
+            <section id="hardware" class="content-section card">
+                <h2>Hardware Acceleration &amp; Mixed Precision</h2>
+                <p class="section-desc">Training visual trajectories and evaluating their physics on a GPU requires optimizations for memory management and exact timing checks.</p>
+                
+                <div class="hardware-grid">
+                    <div class="hardware-card">
+                        <div class="h-card-header">
+                            <span class="h-card-icon">⚡</span>
+                            <h4>Automatic Mixed Precision (AMP)</h4>
+                        </div>
+                        <p>To optimize training throughput on the <strong>NVIDIA RTX A5000 Laptop GPU</strong>, we integrated PyTorch's mixed precision utilities:</p>
+                        <ul>
+                            <li><strong><code>torch.cuda.amp.autocast()</code></strong>: Dynamically casts compatible operations (like convolutions) to 16-bit brain float/half precision formats while leaving loss computation in standard 32-bit float.</li>
+                            <li><strong><code>torch.cuda.amp.GradScaler</code></strong>: Automatically scales loss values prior to backpropagation, preventing numerical gradient underflow (grad rounding to zero) and automatically unscaling before weights update.</li>
+                        </ul>
+                    </div>
+
+                    <div class="hardware-card">
+                        <div class="h-card-header">
+                            <span class="h-card-icon">⏱️</span>
+                            <h4>Precise Latency Benchmarking</h4>
+                        </div>
+                        <p>GPU operations run asynchronously relative to the CPU, meaning benchmark timers require hardware block synchronization to reflect true speeds:</p>
+                        <pre><code># Correct GPU timing framework
+torch.cuda.synchronize()
+start_time = time.time()
+
+# Sampling operations
+samples = trainer.sample(N)
+
+torch.cuda.synchronize()
+latency_ms = (time.time() - start_time) * 1000</code></pre>
+                        <p class="alert-info">Without <code>torch.cuda.synchronize()</code>, CPU timers yield inaccurate results like <strong>0.13 ms</strong> per image, while the physical synchronization shows <strong>1.00 ms</strong>.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Conclusions -->
+            <section id="conclusions" class="content-section card">
+                <h2>Evaluation Conclusions &amp; Insights</h2>
+                <div class="conclusions-container">
+                    <div class="conclusion-block">
+                        <div class="conclusion-title">
+                            <span class="c-badge purple-bg">DDPM</span>
+                            <h4>Robust Geometry, High Complexity</h4>
+                        </div>
+                        <p>DDPM maintains the lowest edge-alignment distance (Chamfer Distance of <strong>0.7711</strong> on CelebA). It performs well at capturing fine structural edges, but the stochastic reverse diffusion process is slow and requires multiple steps ($50+$), resulting in high latency.</p>
+                    </div>
+
+                    <div class="conclusion-block">
+                        <div class="conclusion-title">
+                            <span class="c-badge green-bg">Flow Matching</span>
+                            <h4>Best Distribution Mapping, Curved Paths</h4>
+                        </div>
+                        <p>FM achieves the best FID equivalent (<strong>3.6626</strong> at 100 epochs on CelebA), showing excellent early mapping of the overall data distribution. However, because paths are curved ($\sim 2.36$ straightness), 1-step sampling is unusable due to severe overshooting, requiring at least 50 steps.</p>
+                    </div>
+
+                    <div class="conclusion-block">
+                        <div class="conclusion-title">
+                            <span class="c-badge orange-bg">Rectified Flow</span>
+                            <h4>Millisecond 1-Step Generation, Straight Paths</h4>
+                        </div>
+                        <p>RF successfully straightens trajectories (straightness score of **$0.9993$** on CelebA and **$1.004$** on Moons). This enables **1-step analytical generation** (latency of only <strong>0.98 ms</strong> per image), providing a **55x speedup** with minimal loss in visual quality (FID of 8.98 vs 3.66 for 50-step FM).</p>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="app-footer">
+                <p>&copy; 2026 Comparative Generative Models Evaluation. Crafted with Vanilla CSS &amp; JS.</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Script -->
+    <script src="app.js"></script>
+</body>
+</html>
