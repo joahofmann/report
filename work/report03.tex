@@ -101,15 +101,7 @@ We evaluate the performance across three specific metrics\cite{87}:
     \item \textbf{MSE (Path Deviation) $\downarrow$:} The mean squared error measuring drift from a linear trajectory\cite{87}.
 \end{itemize}
 
-\subsection{Software Aids}
-During the execution of this course project, several AI assistants and typesetting platforms were utilized to support development, writing, and documentation:
-\begin{enumerate}
-    \item For editing the report and for structuring, we used Antigravity.
-    \item For typesetting, we used Overleaf.
-    \item For describing the compute environment in Appendix A, we used Antigravity.
-    \item For code development, we also used ChatGPT and Antigravity.
-    \item Antigravity and NotebookLM were used to generate text in all chapters.
-\end{enumerate}
+
 
 
 \section{Evaluation}
@@ -175,6 +167,16 @@ In this comparative evaluation, we analyzed the performance and stability trade-
     \item \textbf{Rectified Flow (Path Straightening):} Through the trajectory-rectification Reflow step, Rectified Flow rewires path connections to be virtually straight ($0.9993$ straightness score on CelebA and $1.0041$ on Dual Moon). This enables $1$-step analytical inference, reducing latency to only $0.98$ ms per image (a $55\times$ speedup) while retaining high-fidelity visual generation (FID equivalent of $8.9868$).
 \end{itemize}
 Consequently, while SDE-based diffusion remains useful for high-quality, noise-robust generation, Rectified Flow represents the optimal choice for real-time edge deployments and high-throughput execution.
+
+\section{Software Aids}
+During the execution of this course project, several AI assistants and typesetting platforms were utilized to support development, writing, and documentation:
+\begin{enumerate}
+    \item For editing the report and for structuring, we used Antigravity.
+    \item For typesetting, we used Overleaf.
+    \item For describing the compute environment in Appendix A, we used Antigravity.
+    \item For code development, we also used ChatGPT and Antigravity.
+    \item Antigravity and NotebookLM were used to generate text in all chapters.
+\end{enumerate}
 
 \begin{thebibliography}{99}
 \bibitem{87} 
